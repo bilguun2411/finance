@@ -12,7 +12,8 @@ var uiController = (function(){
             return {
             type: document.querySelector(DOMstrings.inputType).value,
             description: document.querySelector(DOMstrings.inputDescription).value,
-            value: document.querySelector(DOMstrings.inputValue).value
+            value: document.querySelector(DOMstrings.inputValue).value,
+            // addBtn: document.querySelector(DOMstrings.addBtn).value
             }
         },
         domStrings: function(){
@@ -44,13 +45,18 @@ var financeController = (function(){
     // console.log(incomes[1].value)
 
     var data = {
-        allItems: {
+        items: {
             inc: [],
             exp: []
         },
         total:{
             inc: 100,
             exp: 200
+        }
+    }
+    return {
+        addItem: function(type, desc,val){
+            data.items[type].push
         }
     }
 
@@ -65,8 +71,10 @@ var appController = (function(uiController,financeController){
     var ctrlAddItem = function(){
         console.log('uusgesen function ajillaj bn')
         //1. oruulah ugugdliig delgetees avah
-        console.log(uiController.getInput());
+        var input = uiController.getInput();
+        console.log(input)
         //2. olj avsan utgaa sanhuugiin controllert damjuulah
+        financeController.addItem(input.type,input.description,input.value);
         //3. olj avsan utgaa web tohirgoo hesegt haragduulna
         //4. Tusviig tootsoolno
         //5. etssiin uldegdel tootsoolno
@@ -86,7 +94,7 @@ var appController = (function(uiController,financeController){
     return {
         init: function(){ 
             setupEventListener();
-            console.log(DOM.inputType);
+            console.log(addEventListener.DOM);
             // ctrlAddItem
         }
     }
