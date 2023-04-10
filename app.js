@@ -50,13 +50,30 @@ var financeController = (function(){
             exp: []
         },
         total:{
-            inc: 100,
-            exp: 200
+            inc: 0,
+            exp: 0
         }
     }
     return {
         addItem: function(type, desc,val){
-            data.items[type].push
+            
+            var item,id;
+            if( data.items[type].lenght === 0 ) {
+                id = 1; 
+            } else {
+                id = data.items[type][data.items[type].lenght-1] + 1 ;
+            };
+
+            if(type === "inc"){
+                item = new Income(id,desc,val);
+            } else {
+                item = new Expense(id,desc,val); 
+            };
+
+            data.items[type].push(item);
+        },
+        seeData: function(){
+            return data;
         }
     }
 
@@ -69,12 +86,13 @@ var appController = (function(uiController,financeController){
     
 
     var ctrlAddItem = function(){
-        console.log('uusgesen function ajillaj bn')
+        // console.log('uusgesen function ajillaj bn')
         //1. oruulah ugugdliig delgetees avah
         var input = uiController.getInput();
         console.log(input)
         //2. olj avsan utgaa sanhuugiin controllert damjuulah
         financeController.addItem(input.type,input.description,input.value);
+        // console.log(financeController.data());
         //3. olj avsan utgaa web tohirgoo hesegt haragduulna
         //4. Tusviig tootsoolno
         //5. etssiin uldegdel tootsoolno
