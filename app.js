@@ -5,14 +5,16 @@ var uiController = (function(){
         inputType :".add__type",
         inputDescription : ".add__description",
         inputValue : ".add__value",
-        addBtn : ".add__btn"
+        addBtn : ".add__btn",
+        incomeList: '.income__list',
+        expenseList: '.expenses__list'
     }
     return {
         getInput: function() {
             return {
             type: document.querySelector(DOMstrings.inputType).value,
             description: document.querySelector(DOMstrings.inputDescription).value,
-            value: document.querySelector(DOMstrings.inputValue).value,
+            value: parseInt( document.querySelector(DOMstrings.inputValue).value),
             // addBtn: document.querySelector(DOMstrings.addBtn).value
             }
         },
@@ -21,14 +23,33 @@ var uiController = (function(){
             return DOMstrings
         },
 
+        clearFields: function(){
+            //ene list butsaadag
+            var fields = document.querySelectorAll(
+                DOMstrings.inputDescription + ',' + DOMstrings.inputValue 
+                )
+            //list g massive ruu shiljuuldeg   field.slice gej bichihgui bgaa shaltgaan ni slice ni LIST dotor bhgui 
+            var fieldsArr = Array.prototype.slice.call(fields);
+            // console.log(fieldsArr);
+            // for (var i = 0 ; i < fieldsArr.length; i++){
+            //     fieldsArr[i].value = ""
+            // }
+            //ahisan davtalt
+            fieldsArr.forEach(function(el,index,array){
+                el.value = ""
+            });
+
+            fieldsArr[0].focus();
+        },
+
         addListItem: function(item,type){
             //1. orlogog zarlagin elemnt aguulsan HTML -g beltgene
             var html,list;
             if (type==='inc') {
-                list = '.income__list'
+                list = DOMstrings.incomeList
                 html = '<div class="item clearfix" id="income-%id%"><div class="item__description">$$Description$$</div><div class="right clearfix"><div class="item__value">$$Value$$</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else {
-                list = '.expenses__list'
+                list = DOMstrings.expenseList
                 html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">$$Description$$</div><div class="right clearfix"><div class="item__value">$$Value$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             //2. ter HTML dotroo orlogo zarlgaiin utguudiig Replace ashiglan uurchlunu
@@ -71,8 +92,18 @@ var financeController = (function(){
         total:{
             inc: 0,
             exp: 0
-        }
+        },
+        tusuv: 0
     }
+    var calculateTotal = function(type){
+        var sum=0;
+        data.items[type].forEach(function(el){
+            sum = sum + el.value
+        });
+        data.total[type] = sum
+    }
+
+
     return {
         addItem: function(type, desc, val) {
 
@@ -82,15 +113,11 @@ var financeController = (function(){
             else {
                 id = data.items[type][data.items[type].length -1].id + 1;
             }
-
-            
-
             if(type === "inc"){
                 item = new Income (id,desc,val);
             } else {
                 item = new Expense(id,desc,val); 
             };
-
             data.items[type].push(item);
 
             return item;
@@ -99,6 +126,27 @@ var financeController = (function(){
 
         seeData: function(){
             return data;
+        },
+
+        tusuvCal: function (){
+            //niit orologo
+            calculateTotal('inc');
+            //niit zarlaga
+            calculateTotal('exp');
+            //tusviig shineer tootsno
+            data.tusuv = data.total.inc - data.total.exp
+            //orlogo zarlgaini huvi
+            data.huvi =  Math.round((data.total.exp/ data.total.inc )*100);
+        },
+
+        tusuvAvah: function (){
+            return {
+                tusuv: data.tusuv,
+                huvi: data.huvi,
+                totalInc: data.total.inc,
+                totalExp: data.total.exp
+            }
+
         }
     }
 
@@ -114,14 +162,22 @@ var appController = (function(uiController,financeController){
         // console.log('uusgesen function ajillaj bn')
         //1. oruulah ugugdliig delgetees avah
         var input = uiController.getInput();
-        console.log(input)
-        //2. olj avsan utgaa sanhuugiin controllert damjuulah
-        var item = financeController.addItem(input.type,input.description,input.value);
-        // console.log(financeController.data());
-        //3. olj avsan utgaa web tohirgoo hesegt haragduulna
-        uiController.addListItem(item, input.type);
-        //4. Tusviig tootsoolno
-        //5. etssiin uldegdel tootsoolno
+        if (input.description !=="" && input.value !== ""){
+            //2. olj avsan utgaa sanhuugiin controllert damjuulah
+            var item = financeController.addItem(input.type,input.description,input.value);
+            // console.log(financeController.data());
+            //3. olj avsan utgaa web tohirgoo hesegt haragduulna
+            uiController.addListItem(item, input.type);
+            uiController.clearFields();
+            //4. Tusviig tootsoolno
+            financeController.tusuvCal();
+            
+            //5. etssiin uldegdel tootsoolno
+            var tusuv = financeController.tusuvAvah();
+
+            //6.Tusviin tootsoog delgetsend gargana
+            console.log(tusuv)
+        }
     };
     
     var setupEventListener = function(){
@@ -138,7 +194,7 @@ var appController = (function(uiController,financeController){
     return {
         init: function(){ 
             setupEventListener();
-            console.log(addEventListener.DOM);
+            // console.log(addEventListener.DOM);
             // ctrlAddItem
         }
     }
