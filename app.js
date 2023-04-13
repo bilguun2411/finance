@@ -11,7 +11,8 @@ var uiController = (function(){
         tusuvLabel: '.budget__value',
         incomeLabe: '.budget__income--value',
         expenseLabel: '.budget__expenses--value',
-        percentageLabel:'.budget__expenses--percentage'
+        percentageLabel:'.budget__expenses--percentage',
+        containerDiv:'.container'
     }
     return {
         getInput: function() {
@@ -57,10 +58,10 @@ var uiController = (function(){
             var html,list;
             if (type==='inc') {
                 list = DOMstrings.incomeList
-                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">$$Description$$</div><div class="right clearfix"><div class="item__value">$$Value$$</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">$$Description$$</div><div class="right clearfix"><div class="item__value">$$Value$$</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else {
                 list = DOMstrings.expenseList
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">$$Description$$</div><div class="right clearfix"><div class="item__value">$$Value$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">$$Description$$</div><div class="right clearfix"><div class="item__value">$$Value$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             //2. ter HTML dotroo orlogo zarlgaiin utguudiig Replace ashiglan uurchlunu
             html = html.replace('%id%', item.id);
@@ -68,6 +69,10 @@ var uiController = (function(){
             html = html.replace('$$Value$$', item.value);
             //3. beltgesen HTML iin DOM ruu oruulj ugnu
             document.querySelector(list).insertAdjacentHTML('beforeend',  html);
+        },
+        deleteListItems: function(id){
+            var el  = document.getElementById(id);
+            el.parentNode.removeChild(el);
         }
     }
 })();
@@ -157,7 +162,18 @@ var financeController = (function(){
                 totalExp: data.total.exp
             }
 
+        },
+        deleteItem: function(type,id){
+            var ids = data.items[type].map(function(el){
+                return el.id;
+            });
+            var index = ids.indexOf(id);
+            if(index !== -1) {
+                data.items[type].splice(index,1);
+            }
         }
+        
+        
     }
 
 })();
@@ -184,7 +200,7 @@ var appController = (function(uiController,financeController){
             
             //5. etssiin uldegdel tootsoolno
             var tusuv = financeController.tusuvAvah();
-            console.log(tusuv)
+            // console.log(tusuv)
             //6.Tusviin tootsoog delgetsend gargana
             uiController.tusuvUzuuleh(tusuv);
             
@@ -200,6 +216,25 @@ var appController = (function(uiController,financeController){
             if(event.keyCode === 13 || event.which === 13) 
             ctrlAddItem();
     
+        });
+
+        document.querySelector(DOM.containerDiv).addEventListener('click',function(event){
+            
+            var id = event.target.parentNode.parentNode.parentNode.parentNode.id;
+            // console.log(id);
+            if(id){
+                var arr = id.split("-");
+                var type = arr[0];
+                var itemId = parseInt(arr[1]);
+                console.log(type + " >>>> " + itemId);
+               
+                //1.sanhuugiin modulias ustgana
+                financeController.deleteItem(type,itemId);
+                //2.degetsees arilgana
+                uiController.deleteListItems(id);
+                //uldegdel tootsoog shinchlene
+            }
+            
         });
     }
     return {
